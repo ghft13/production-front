@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-const API_BASE_URL = "https://porudction-back.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 interface AuthFormProps {
   mode: "login" | "signup";
