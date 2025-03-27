@@ -149,10 +149,9 @@
 //   return context;
 // };
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from "react";
 
-const API_BASE_URL =  "https://porudction-back.onrender.com";
+const API_BASE_URL = "https://porudction-back.onrender.com";
 
 interface User {
   name: string;
@@ -245,29 +244,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     }
   };
+
   const adminLogin = async (adminId: string, password: string) => {
     try {
-      const response = await fetch("${API_BASE_URL}/api/auth/admin/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminId, password }),
-        credentials: "include", // ✅ Ensures cookies/session are included
+        credentials: "include",
       });
-  
+
       const data = await response.json();
-  
-      console.log(data)
+
       if (response.ok) {
-       
-  
-        // ✅ Corrected: Update authentication state using `setUser`
+        localStorage.setItem("doit-token", data.token); // Store admin token
         setUser({
           name: data.user.name,
           email: data.user.email,
           role: "admin",
           adminId: data.user.adminId,
         });
-  
+
         return true;
       } else {
         console.error("Admin login failed:", data.message);
@@ -278,16 +275,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
   };
-  
-  
-  
-  const isAuthenticated = !!user;
-  const isAdmin = user?.role === "admin";
+
+  const isAuthenticated = useMemo(() => !!user, [user]);
+  const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, setUser, logout, isAuthenticated, isAdmin, login, adminLogin }}
-    >
+    <AuthContext.Provider value={{ user, loading, setUser, logout, isAuthenticated, isAdmin, login, adminLogin }}>
       {children}
     </AuthContext.Provider>
   );

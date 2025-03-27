@@ -8,25 +8,28 @@ const AdminLogin = () => {
   const { adminLogin } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     setError("");
     setLoading(true);
-  
-    const isValid = await adminLogin(adminId, password);
-    setLoading(false);
-  
-    if (isValid) {
-      console.log("Hey");
-      console.log("Navigating to /admin"); // ✅ Log before navigation
-      navigate("/admin", { replace: true });
-      console.log("After navigate"); // ✅ Log after navigation
-    } else {
-      setError("Invalid admin credentials!");
+
+    try {
+      const isValid = await adminLogin(adminId, password);
+      if (isValid) {
+        console.log("Login successful, navigating to /admin");
+        navigate("/admin", { replace: true });
+      } else {
+        setError("Invalid admin credentials!");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-sm">
@@ -52,7 +55,7 @@ const AdminLogin = () => {
 
         <button
           onClick={handleLogin}
-          disabled={loading} // Disable button when loading
+          disabled={loading}
           className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200 ${
             loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
